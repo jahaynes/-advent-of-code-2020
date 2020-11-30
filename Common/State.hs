@@ -6,8 +6,8 @@ newtype State s a =
 instance Functor (State s) where
 
   fmap f (State run) = State $ \s ->
-    let (s', a) = run s
-    in (s', f a)
+    let (s',   a) = run s
+    in  (s', f a)
 
 instance Applicative (State s) where
 
