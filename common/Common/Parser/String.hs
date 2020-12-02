@@ -22,6 +22,12 @@ suchnt f = such (not . f)
 char :: Char -> Parser String Char
 char c = such (==c)
 
+oneChar :: Parser String Char
+oneChar = Parser f
+  where
+  f     [] = Left "no char available"
+  f (x:xs) = Right (xs, x)
+
 digit :: Parser String Int
 digit = Parser $ \s -> runParser (such isDigit) s <&> (\(s', x) -> (s', digitToInt x))
 
