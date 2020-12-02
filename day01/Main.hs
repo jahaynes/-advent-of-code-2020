@@ -14,7 +14,7 @@ parseInput = Input <$> many (int <* endOfLine)
 _sampleInput :: Input
 _sampleInput = Input [1721, 979, 366, 299, 675, 1456]
 
--- Chop any inputs to big to sum to 2020 with the smallest element
+-- Chop any inputs too big to sum to 2020 with the smallest element
 cull2 :: Input -> Input 
 cull2 (Input xs) | any (< 0) xs = Input xs
                  | otherwise =
@@ -22,7 +22,7 @@ cull2 (Input xs) | any (< 0) xs = Input xs
                          rest     = filter (\x -> x + smallest <= 2020) xs
                      in Input rest
 
--- Chop any inputs to big to sum to 2020 with the smallest two elements
+-- Chop any inputs too big to sum to 2020 with the smallest two elements
 cull3 :: Input -> Input 
 cull3 (Input xs) | any (< 0) xs = Input xs
                  | otherwise =
