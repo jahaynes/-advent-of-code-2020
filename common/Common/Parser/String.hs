@@ -5,7 +5,7 @@ import Common.Parser.Combinator
 
 import Control.Applicative ((<|>))
 import Data.Char           (isDigit, digitToInt)
-import Data.Functor        ((<&>))
+import Data.Functor        ((<&>), void)
 
 import Prelude hiding (takeWhile, dropWhile)
 
@@ -21,6 +21,9 @@ suchnt f = such (not . f)
 
 char :: Char -> Parser String Char
 char c = such (==c)
+
+char_ :: Char -> Parser String ()
+char_ c = void $ such (==c)
 
 oneChar :: Parser String Char
 oneChar = Parser f

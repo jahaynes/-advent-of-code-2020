@@ -2,6 +2,8 @@ module Common.Parser.Combinator where
 
 import Common.Parser (Parser (..))
 
+import Data.Functor (void)
+
 many :: Parser s a -> Parser s [a]
 many p = Parser (go [])
   where
@@ -9,6 +11,9 @@ many p = Parser (go [])
     case runParser p s of
       Left _ -> Right (s, reverse acc)
       Right (s', a) -> go (a:acc) s'
+
+many_ :: Parser s a -> Parser s ()
+many_ = void . many
 
 many1 :: Parser s a -> Parser s [a]
 many1 p = do
@@ -33,3 +38,6 @@ eof = Parser go
   where
   go [] = Right ([], ())
   go  _ = Left "not eof"
+
+ok :: Parser a ()
+ok = pure ()
