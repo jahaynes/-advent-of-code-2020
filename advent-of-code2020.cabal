@@ -44,3 +44,10 @@ executable day04
   build-depends:       base, common, containers
   hs-source-dirs:      day04
   default-language:    Haskell2010
+
+executable day05
+  ghc-options:         -Wall -O3
+  main-is:             Main.hs
+  build-depends:       base, common, containers
+  hs-source-dirs:      day05
+  default-language:    Haskell2010
