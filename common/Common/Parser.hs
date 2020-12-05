@@ -56,3 +56,9 @@ parse p s =
     Left l                    -> Left l
     Right (s', x) | null s'   -> Right x
                   | otherwise -> Left $ "Leftover input: " ++ take 50 (show s') ++ "..."
+
+parseMaybe :: (Show (f s), Foldable f) => Parser (f s) a -> f s -> Maybe a
+parseMaybe p s =
+    case parse p s of
+        Left _ -> Nothing
+        Right x -> Just x

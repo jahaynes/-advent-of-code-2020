@@ -1,11 +1,9 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 import Common.Parser
 import Common.Parser.Combinator
 import Common.Parser.String as P
 
 import           Control.Applicative ((<|>))
-import           Control.Monad       (unless, when)
+import           Control.Monad       (unless)
 import           Data.Char           (isDigit, isSpace)
 import           Data.List           (groupBy)
 import           Data.Maybe          (fromJust, isJust)
@@ -34,6 +32,9 @@ required :: Set String
 required = S.fromList [ "byr", "iyr", "eyr"
                       , "hgt", "hcl", "ecl"
                       , "pid" ]
+
+validEcls :: Set String
+validEcls = S.fromList ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
 
 newtype Info =
     Info (Map String String)
@@ -72,68 +73,52 @@ validate (NorthPoleCredentials m) = validateMap (Info m)
 validate _                        = False
 
 validateMap :: Info -> Bool
-validateMap (Info m) = all isJust [validByr, validIyr, validEyr, validHgt, validHcl, validEcl, validPid]
+validateMap (Info m) = all isJust [ validByr, validIyr, validEyr
+                                  , validHgt, validHcl, validEcl
+                                  , validPid ]
+
     where
+    validByr = M.lookup "byr" m
+           >>= readMaybe
+           >>= between 1920 2002
 
-    validByr = do
-        year :: Int <- readMaybe =<< M.lookup "byr" m
-        if year < 1920 || year > 2002
-            then Nothing
-            else Just ()
+    validIyr = M.lookup "iyr" m
+           >>= readMaybe
+           >>= between 2010 2020
 
-    validIyr = do
-        year :: Int <- readMaybe =<< M.lookup "iyr" m
-        if year < 2010 || year > 2020
-            then Nothing
-            else Just ()
+    validEyr = M.lookup "eyr" m
+           >>= readMaybe
+           >>= between 2020 2030
 
-    validEyr = do
-        year :: Int <- readMaybe =<< M.lookup "eyr" m
-        if year < 2020 || year > 2030
-            then Nothing
-            else Just ()
-
-    validHgt = do
-        height <- M.lookup "hgt" m
-        case parse (validCm <|> validIn) height of
-            Left   _ -> Nothing
-            Right () -> Just ()
+    validHgt = M.lookup "hgt" m
+           >>= parseMaybe (validCm <|> validIn)
         where
-        validCm = do
-            i <- int <* string "cm"
-            when (i < 150) (fail "")
-            when (i > 193) (fail "")
-        validIn = do
-            i <- int <* string "in"
-            when (i < 59) (fail "")
-            when (i > 76) (fail "")
+        validCm = between 150 193 =<< int <* string "cm"
+        validIn = between  59  76 =<< int <* string "in"
 
-    validHcl = do
-        col <- M.lookup "hcl" m
-        case parse hcl col of
-            Left   _ -> Nothing
-            Right () -> Just ()
+    validHcl = M.lookup "hcl" m
+           >>= parseMaybe hcl
         where
-        hcl = do
-            char_ '#'
-            many_ (such (\c -> isDigit c || c >= 'a' && c <= 'f'))
-            ok
+        hcl = do char_ '#'
+                 many_ (such (\c -> isDigit c || c >= 'a' && c <= 'f'))
 
-    validEcl = do
-        col <- M.lookup "ecl" m
-        if col `S.member` S.fromList ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
-            then Just ()
-            else Nothing
+    validEcl = do col <- M.lookup "ecl" m
+                  assert $ col `S.member` validEcls
 
-    validPid = do
-        col <- M.lookup "pid" m
-        case parse validCid col of
-            Left _   -> Nothing
-            Right () -> Just ()
+    validPid = M.lookup "pid" m
+           >>= parseMaybe validCid
         where
-        validCid = do
-            ds <- many digit
-            unless (length ds == 9) (fail "")
+        validCid = do ds <- many digit
+                      unless (length ds == 9) (fail "")
+
+    assert :: MonadFail m => Bool -> m ()
+    assert b | b         = pure ()
+             | otherwise = fail ""
+
+    between :: MonadFail m => Int -> Int -> Int -> m ()
+    between lo hi x =
+        assert  $ x >= lo
+               && x <= hi
 
 classify :: Info -> Passport
 classify (Info m) =
