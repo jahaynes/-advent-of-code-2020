@@ -4,20 +4,10 @@ import Common.Parser            (Parser (..))
 import Common.Parser.Combinator
 
 import Control.Applicative ((<|>))
-import Data.Char           (isDigit, digitToInt)
+import Data.Char           (digitToInt, isDigit, isSpace)
 import Data.Functor        ((<&>), void)
 
 import Prelude hiding (takeWhile, dropWhile)
-
-such :: (Char -> Bool) -> Parser String Char
-such f = Parser go
-  where
-  go     []             = Left "out of input"
-  go (x:xs) | f x       = Right (xs, x)
-  go     _  | otherwise = Left "mismatch"
-
-suchnt :: (Char -> Bool) -> Parser String Char
-suchnt f = such (not . f)
 
 char :: Char -> Parser String Char
 char c = such (==c)
@@ -41,17 +31,8 @@ int :: Parser String Int
 int = nat
   <|> negate <$> (char '-' *> nat)
 
-takeWhile :: (Char -> Bool) -> Parser String String
-takeWhile p = many (such p)
-
-takeWhile1 :: (Char -> Bool) -> Parser String String
-takeWhile1 p = many1 (such p)
-
-dropWhile :: (Char -> Bool) -> Parser String ()
-dropWhile p = many (such p) <&> \_ -> ()
-
-dropWhile1 :: (Char -> Bool) -> Parser String ()
-dropWhile1 p = many1 (such p) <&> \_ -> ()
+whitespace :: Parser String String
+whitespace = takeWhile isSpace
 
 takeUntil :: (a -> Bool) -> Parser [a] [a]
 takeUntil p = Parser (go [])
@@ -70,6 +51,9 @@ takeUntil' p = Parser (go [])
 string :: String -> Parser String String
 string = list
       
+string_ :: String -> Parser String ()
+string_ = void <$> string
+
 endOfLine :: Parser String ()
 endOfLine = (string "\r\n" <&> \_ -> ())
         <|> (char   '\n'   <&> \_ -> ())

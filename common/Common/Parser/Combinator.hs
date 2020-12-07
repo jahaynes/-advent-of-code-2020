@@ -2,7 +2,7 @@ module Common.Parser.Combinator where
 
 import Common.Parser (Parser (..))
 
-import Data.Functor (void)
+import Data.Functor ((<&>), void)
 
 many :: Parser s a -> Parser s [a]
 many p = Parser (go [])
@@ -21,6 +21,28 @@ many1 p = do
   if null xs
     then fail "none found for many1"
     else pure xs
+
+such :: (a -> Bool) -> Parser [a] a
+such f = Parser go
+  where
+  go     []             = Left "out of input"
+  go (x:xs) | f x       = Right (xs, x)
+  go     _  | otherwise = Left "mismatch"
+
+suchnt :: (a -> Bool) -> Parser [a] a
+suchnt f = such (not . f)
+
+takeWhile :: (a -> Bool) -> Parser [a] [a]
+takeWhile p = many (such p)
+
+takeWhile1 :: (a -> Bool) -> Parser [a] [a]
+takeWhile1 p = many1 (such p)
+
+dropWhile :: (a -> Bool) -> Parser [a] ()
+dropWhile p = many (such p) <&> \_ -> ()
+
+dropWhile1 :: (a -> Bool) -> Parser [a] ()
+dropWhile1 p = many1 (such p) <&> \_ -> ()
 
 list :: Eq a => [a] -> Parser [a] [a]
 list xs = Parser $ \s ->
