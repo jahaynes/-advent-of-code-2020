@@ -1,6 +1,6 @@
 import Common.Parser
 import Common.Parser.Combinator
-import Common.Parser.String as P
+import Common.Parser.String
 
 import           Control.Applicative ((<|>))
 import           Control.Monad       (unless)
@@ -12,6 +12,8 @@ import qualified Data.Map as M
 import           Data.Set      (Set)
 import qualified Data.Set as S
 import           Text.Read           (readMaybe)
+
+import Prelude hiding (takeWhile)
 
 _sampleInput :: String
 _sampleInput = "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd\n\
@@ -63,7 +65,7 @@ parser2 = map (Info . M.fromList . map fromJust)
     cont = do
         k <- takeUntil (==':')
         char_ ':'
-        v <- P.takeWhile (not . isSpace)
+        v <- takeWhile (not . isSpace)
         char_ '\n' <|> char_ ' ' <|> ok
         pure $ Just (k, v)
 
