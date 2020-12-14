@@ -68,4 +68,5 @@ line = do
     then fail "eof"
     else pure ln
   
-
+end :: Parser String ()
+end = endOfLine <|> eof
