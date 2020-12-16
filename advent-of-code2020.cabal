@@ -128,3 +128,10 @@ executable day15fast
   build-depends:       base, judy
   hs-source-dirs:      day15/fast
   default-language:    Haskell2010
+
+executable day16
+  ghc-options:         -Wall -O3
+  main-is:             Main.hs
+  build-depends:       base, common, containers
+  hs-source-dirs:      day16
+  default-language:    Haskell2010
