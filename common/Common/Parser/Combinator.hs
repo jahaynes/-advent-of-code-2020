@@ -22,6 +22,12 @@ many1 p = do
     then fail "none found for many1"
     else pure xs
 
+one :: Parser [a] a
+one = Parser f
+  where
+  f     [] = Left "no one available"
+  f (x:xs) = Right (xs, x)
+
 such :: (a -> Bool) -> Parser [a] a
 such f = Parser go
   where

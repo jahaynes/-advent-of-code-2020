@@ -18,9 +18,9 @@ _sampleInput = "1-3 a: abcde\n\
 parseInput :: Parser String [(Rule, Pword)]
 parseInput = many $ do
 
-    rule <- Rule <$> int     <* char '-'
-                 <*> int     <* char ' '
-                 <*> oneChar <* string ": "
+    rule <- Rule <$> int <* char '-'
+                 <*> int <* char ' '
+                 <*> one <* string ": "
 
     pword <- Pword <$> line
 

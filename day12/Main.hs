@@ -82,4 +82,4 @@ main = do
     parser :: Parser String [(Char, Int)]
     parser = dropWhile isSpace *> many (instr <* dropWhile isSpace)
         where
-        instr = (,) <$> oneChar <*> int
+        instr = (,) <$> one <*> int
