@@ -149,3 +149,10 @@ executable day18
   build-depends:       base, common
   hs-source-dirs:      day18
   default-language:    Haskell2010
+
+executable day19
+  ghc-options:         -Wall -O3
+  main-is:             Main.hs
+  build-depends:       base, common, containers
+  hs-source-dirs:      day19
+  default-language:    Haskell2010

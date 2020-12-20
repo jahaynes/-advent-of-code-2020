@@ -28,6 +28,13 @@ one = Parser f
   f     [] = Left "no one available"
   f (x:xs) = Right (xs, x)
 
+opt :: (a -> Bool) -> Parser [a] (Maybe a)
+opt c = Parser f
+    where
+    f     []             = Right (  [], Nothing)
+    f (x:xs) | c x       = Right (  xs, Just x)
+             | otherwise = Right (x:xs, Nothing)
+
 such :: (a -> Bool) -> Parser [a] a
 such f = Parser go
   where
